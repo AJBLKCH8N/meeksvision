@@ -1,0 +1,15 @@
+{
+    "name": "AI Vision Security System",
+    "image": "nvcr.io/nvidia/l4t-base:r32.4.4",
+    "settings": { 
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "extensions": [
+        "ms-python.python"
+    ],
+    "forwardPorts": [
+        8000 // Example: Forward a port for web development testing
+    ],
+    "postCreateCommand": "pip install -r requirements.txt",
+    "remoteUser": "root"
+}
