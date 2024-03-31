@@ -1,0 +1,37 @@
+version: '3.8'
+services:
+  dev:
+    build:
+      context: .devcontainer
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace
+    command: /bin/sh -c "while sleep 1000; do :; done"
+
+  wyze-bridge:
+    image: mrlt8/wyze-bridge:latest
+    environment:
+      - WYZE_EMAIL=your_email@example.com
+      - WYZE_PASSWORD=your_password
+    ports:
+      - "1935:1935" # RTMP
+      - "8554:8554" # RTSP
+      - "8888:8888" # Web UI
+    networks:
+      - vision-net
+
+  vision-app:
+    build: ./app
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+    environment:
+      - STREAM_URLS_FILE=/app/config/streams.json
+    depends_on:
+      - wyze-bridge
+    networks:
+      - app-network
+
+networks:
+  vision-net:
+    driver: bridge
