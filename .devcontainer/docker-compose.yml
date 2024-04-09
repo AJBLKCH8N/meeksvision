@@ -1,37 +1,49 @@
 version: '3.8'
+
 services:
-  dev:
+  video-stream-ingestion:
     build:
-      context: .devcontainer
+      context: ./services/video-stream-ingestion
       dockerfile: Dockerfile
     volumes:
-      - .:/workspace
-    command: /bin/sh -c "while sleep 1000; do :; done"
-
-  wyze-bridge:
-    image: mrlt8/wyze-bridge:latest
+      - video-data:/data
     environment:
-      - WYZE_EMAIL=your_email@example.com
-      - WYZE_PASSWORD=your_password
-    ports:
-      - "1935:1935" # RTMP
-      - "8554:8554" # RTSP
-      - "8888:8888" # Web UI
+      CAMERA_SOURCE: "${CAMERA_SOURCE}"
     networks:
-      - vision-net
+      - app_network
 
-  vision-app:
-    build: ./app
+  facial-recognition:
+    build:
+      context: ./services/facial-recognition
+      dockerfile: Dockerfile
     volumes:
-      - ./src:/app/src
-      - ./data:/app/data
-    environment:
-      - STREAM_URLS_FILE=/app/config/streams.json
+      - video-data:/data
     depends_on:
-      - wyze-bridge
+      - video-stream-ingestion
     networks:
-      - app-network
+      - app_network
+
+  database:
+    image: nouchka/sqlite3
+    volumes:
+      - db-data:/root/db
+    networks:
+      - app_network
+
+  ui:
+    build:
+      context: ./services/ui
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - facial-recognition
+    networks:
+      - app_network
+
+volumes:
+  video-data:
+  db-data:
 
 networks:
-  vision-net:
-    driver: bridge
+  app_network:
