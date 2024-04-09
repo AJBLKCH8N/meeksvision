@@ -1,8 +1,13 @@
 {
-    "name": "MeeksVision",
-    "dockerComposeFile": "../docker-compose.yml",
-    "service": "facial-recognition",
+    "name": "Video Processing Development Container",
+    "dockerComposeFile": "docker-compose.devcontainer.yml",
+    "service": "video-stream-processor",
     "workspaceFolder": "/workspace",
+    "forwardPorts": [8080, 1935],
+    "extensions": ["ms-python.python", "ms-vscode.cpptools"],
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "postCreateCommand": "pip install -r requirements.txt",
     "shutdownAction": "stopCompose"
-  }
-  
+}

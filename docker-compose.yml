@@ -15,7 +15,7 @@ services:
   streaming-service:
     build: ./services/streaming-service
     ports:
-      - "1935:1935"
-      - "8080:8080"
+      - "1935:1935" # RTMP
+      - "8080:8080" # HTTP for HLS
     volumes:
       - ./data/hls:/mnt/hls
