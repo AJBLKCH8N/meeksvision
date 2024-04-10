@@ -1,13 +1,17 @@
 {
-    "name": "Video Processing Development Container",
-    "dockerComposeFile": "docker-compose.devcontainer.yml",
+    "name": "Meeks Vision Dev Container",
+    "dockerComposeFile": "docker-compose.yml",
     "service": "video-stream-processor",
     "workspaceFolder": "/workspace",
-    "forwardPorts": [8080, 1935],
-    "extensions": ["ms-python.python", "ms-vscode.cpptools"],
+    "forwardPorts": [8080, 1935, 80],
+    "extensions": [
+      "ms-python.python",
+      "dbaeumer.vscode-eslint"
+    ],
     "settings": {
-        "terminal.integrated.shell.linux": "/bin/bash"
+      "terminal.integrated.shell.linux": "/bin/bash"
     },
     "postCreateCommand": "pip install -r requirements.txt",
     "shutdownAction": "stopCompose"
-}
+  }
+  

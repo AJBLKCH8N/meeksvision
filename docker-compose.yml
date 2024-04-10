@@ -2,20 +2,34 @@ version: '3.8'
 
 services:
   video-stream-processor:
-    build: ./services/video-stream-processor
+    build:
+      context: ./services/video-stream-processor
     environment:
-      - CAMERA_URLS=rtsp://camera1/stream,rtsp://camera2/stream
-      - KNOWN_FACES_DIR=./data/faces
-      - ENCODINGS_FILE=./data/encodings/known_face_encodings.pkl
-      - STREAM_OUTPUT_URL=rtmp://streaming-service/live/stream
+      - CAMERA_URLS=${CAMERA_URLS}
+      - KNOWN_FACES_DIR=${KNOWN_FACES_DIR}
+      - ENCODINGS_FILE=${ENCODINGS_FILE}
+      - STREAM_OUTPUT_URL=${STREAM_OUTPUT_URL}
     volumes:
-      - ./data/faces:/data/faces
-      - ./data/encodings:/data/encodings
+      - ./data/faces:/app/faces
+    depends_on:
+      - streaming-service
 
   streaming-service:
-    build: ./services/streaming-service
+    build:
+      context: ./services/streaming-service
     ports:
       - "1935:1935" # RTMP
       - "8080:8080" # HTTP for HLS
     volumes:
       - ./data/hls:/mnt/hls
+
+  ui:
+    build:
+      context: ./services/ui
+    ports:
+      - "80:80"
+    depends_on:
+      - streaming-service
+
+volumes:
+  hls: # This volume stores HLS video fragments

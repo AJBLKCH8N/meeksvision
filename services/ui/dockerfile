@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  video-stream-processor:
+    build: ./services/video-stream-processor
+    environment:
+      CAMERA_URLS: "rtsp://camera1/stream,rtsp://camera2/stream"
+  streaming-service:
+    build: ./services/streaming-service
+    ports:
+      - "1935:1935" # RTMP
+      - "8080:8080" # HTTP for HLS
+    volumes:
+      - ./data/hls:/mnt/hls
+  ui:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./services/ui/src:/usr/share/nginx/html:ro
+    depends_on:
+      - video-stream-processor
