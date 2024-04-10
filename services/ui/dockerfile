@@ -1,22 +1,23 @@
-version: '3.8'
+# Use the Nginx image from Docker Hub as a base image
+FROM nginx:alpine
 
-services:
-  video-stream-processor:
-    build: ./services/video-stream-processor
-    environment:
-      CAMERA_URLS: "rtsp://camera1/stream,rtsp://camera2/stream"
-  streaming-service:
-    build: ./services/streaming-service
-    ports:
-      - "1935:1935" # RTMP
-      - "8080:8080" # HTTP for HLS
-    volumes:
-      - ./data/hls:/mnt/hls
-  ui:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./services/ui/src:/usr/share/nginx/html:ro
-    depends_on:
-      - video-stream-processor
+# Remove the default Nginx configuration file
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copy the custom Nginx configuration file
+COPY nginx.conf /etc/nginx/conf.d
+
+# Set working directory to nginx asset directory
+WORKDIR /usr/share/nginx/html
+
+# Remove default nginx static assets
+RUN rm -rf ./*
+
+# Copies static resources from the host to the container
+COPY ./src .
+
+# Exposes port 80 to the Docker network (optional)
+EXPOSE 80
+
+# Containers run nginx with global directives and daemon off
+CMD ["nginx", "-g", "daemon off;"]

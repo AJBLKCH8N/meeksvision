@@ -1,2 +1,4 @@
 streams.json
-services/video-stream-processor/faces/*
+data/faces/*
+data/config/*
+data/encoding/*

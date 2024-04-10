@@ -5,33 +5,18 @@ import os
 import pickle
 import subprocess
 from multiprocessing import Process
-from dotenv import load_dotenv
+import json
 
-# Load environment variables from a .env file
-load_dotenv()
+# Load configurations from a config file within the mounted volume
+def load_config(config_path='data/config/config.json'):
+    with open(config_path, 'r') as file:
+        return json.load(file)
 
-def encode_known_faces():
-    known_faces_dir = os.getenv('KNOWN_FACES_DIR', '../faces')
-    encodings_file = os.getenv('ENCODINGS_FILE', 'known_face_encodings.pkl')
-
-    known_face_encodings = []
-    known_face_names = []
-
-    for filename in os.listdir(known_faces_dir):
-        if filename.endswith('.jpg') or filename.endswith('.png'):
-            name = os.path.splitext(filename)[0]
-            filepath = os.path.join(known_faces_dir, filename)
-            image = face_recognition.load_image_file(filepath)
-            encoding = face_recognition.face_encodings(image)[0]
-
-            known_face_encodings.append(encoding)
-            known_face_names.append(name)
-    
-    with open(encodings_file, 'wb') as file:
-        pickle.dump((known_face_encodings, known_face_names), file)
+config = load_config()
 
 def load_known_faces():
-    encodings_file = os.getenv('ENCODINGS_FILE', 'known_face_encodings.pkl')
+    encodings_file = config.get('encodings_file', 'known_face_encodings.pkl')
+    print(f"Attempting to load encodings from: {encodings_file}")
     with open(encodings_file, 'rb') as file:
         known_face_encodings, known_face_names = pickle.load(file)
     return known_face_encodings, known_face_names
@@ -70,7 +55,7 @@ def process_video_stream(stream_url, known_face_encodings, known_face_names):
         '-vcodec', 'libx264',
         '-preset', 'veryfast',
         '-f', 'flv',
-        'rtmp://localhost/services/streaming-service'  # Stream to the NGINX RTMP application
+        'rtmp://streaming-service/live/stream'  # Stream to the NGINX RTMP application
     ]
     ffmpeg_process = subprocess.Popen(command, stdin=subprocess.PIPE)
     
@@ -80,6 +65,7 @@ def process_video_stream(stream_url, known_face_encodings, known_face_names):
             break
         rgb_frame = frame[:, :, ::-1]
         face_locations = face_recognition.face_locations(rgb_frame)
+        print(f"Face locations: {face_locations}")
         face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
         face_names = []
         for face_encoding in face_encodings:
@@ -95,9 +81,9 @@ def process_video_stream(stream_url, known_face_encodings, known_face_names):
         # Stream the processed frame to FFmpeg
         stream_to_ffmpeg(frame, ffmpeg_process)
 
-        cv2.imshow('Video', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        # cv2.imshow('Video', frame)
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        #    break
 
     video_capture.release()
     ffmpeg_process.stdin.close()
@@ -105,7 +91,7 @@ def process_video_stream(stream_url, known_face_encodings, known_face_names):
 
 def main():
     known_face_encodings, known_face_names = load_known_faces()
-    stream_urls = os.getenv('CAMERA_URLS', '').split(',')
+    stream_urls = config.get('camera_urls', ['rtsp://localhost/stream1'])
     processes = []
     for url in stream_urls:
         process = Process(target=process_video_stream, args=(url, known_face_encodings, known_face_names))

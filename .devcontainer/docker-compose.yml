@@ -4,26 +4,24 @@ services:
   video-stream-processor:
     build:
       context: ../services/video-stream-processor
-      dockerfile: Dockerfile
     volumes:
-      - ../services/video-stream-processor:/workspace:cached
-      - ../data/faces:/workspace/faces:cached
-    environment:
-      CAMERA_URLS: "rtsp://camera1/stream,rtsp://camera2/stream"
-      KNOWN_FACES_DIR: "/workspace/faces"
-      ENCODINGS_FILE: "/workspace/faces/known_face_encodings.pkl"
-      STREAM_OUTPUT_URL: "rtmp://localhost/live/stream"
+      - ../data:/app/data  # Mount the entire data directory
+    depends_on:
+      - streaming-service
+
   streaming-service:
     build:
       context: ../services/streaming-service
     ports:
       - "1935:1935" # RTMP
       - "8080:8080" # HTTP for HLS
+    volumes:
+      - ../data/hls:/mnt/hls  # This remains the same if the service directly uses the HLS directory
+
   ui:
     build:
       context: ../services/ui
     ports:
       - "80:80"
-
-volumes:
-  hls: # This volume stores HLS video fragments
+    depends_on:
+      - streaming-service

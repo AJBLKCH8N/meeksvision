@@ -1,24 +1,27 @@
 # Use an official Python runtime as a base image
 FROM python:3.9-slim
 
-# Install FFmpeg for video processing
-RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+# Install dependencies required for dlib
+# Install FFmpeg, CMake, and build tools for dlib
+RUN apt-get update && \
+    apt-get install -y ffmpeg cmake build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
-# Set the working directory in the container to /app
+
+# Set the working directory in the container to /app/src
+WORKDIR /app/src
+
+# Copy only the necessary directories into the container
+# Assuming your project structure includes src for source code and possibly other directories
+COPY src/ ./
+COPY requirements.txt /app/
+
+# Move back to /app to install Python dependencies
 WORKDIR /app
-
-# Copy the current directory contents into the container at /app
-COPY . /app
-
-# Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Make port 5000 available to the world outside this container
-# Adjust if your app uses a different port (You may not need this for a processing service that doesn't serve HTTP content)
-# EXPOSE 5000
 
 # Define environment variable
 ENV NAME VideoStreamProcessor
 
-# Run main.py (or your main script name) when the container launches
-CMD ["python", "main.py"]
+# The command to run main.py
+CMD ["python", "src/main.py"]

@@ -22,6 +22,8 @@ services:
       - "8080:8080" # HTTP for HLS
     volumes:
       - ./data/hls:/mnt/hls
+      - ./data/config:/mnt/config
+      - ./data/faces:/mnt/faces
 
   ui:
     build:
