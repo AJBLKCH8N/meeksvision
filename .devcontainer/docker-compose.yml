@@ -5,7 +5,7 @@ services:
     build:
       context: ../services/video-stream-processor
     volumes:
-      - ../data:/app/data  # Mount the entire data directory
+      - ../data:/app/data
     depends_on:
       - streaming-service
 
@@ -13,10 +13,10 @@ services:
     build:
       context: ../services/streaming-service
     ports:
-      - "1935:1935" # RTMP
-      - "8080:8080" # HTTP for HLS
+      - "1935:1935"
+      - "8080:8080"
     volumes:
-      - ../data/hls:/mnt/hls  # This remains the same if the service directly uses the HLS directory
+      - ../data/hls:/mnt/hls 
 
   ui:
     build:

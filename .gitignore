@@ -2,3 +2,4 @@ streams.json
 data/faces/*
 data/config/*
 data/encoding/*
+data/hls/*
