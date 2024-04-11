@@ -70,15 +70,14 @@ def process_video_stream(stream_url, known_face_encodings, known_face_names, max
         if not ret:
             break
         rgb_frame = frame[:, :, ::-1]
-        # Try to detect face locations in the frame
+        
         face_locations = face_recognition.face_locations(rgb_frame)
         logging.debug(f"Detected face locations: {face_locations}")
 
-        # Attempt to encode faces based on detected locations
+        face_encodings = []  # Initialize face_encodings to ensure it's always defined
         try:
-            if face_locations:  # Ensure there are detected faces before encoding
+            if face_locations:
                 face_encodings = face_recognition.face_encodings(rgb_frame, known_face_locations=face_locations)
-                # Process face encodings as before
             else:
                 logging.debug("No faces detected in this frame.")
         except Exception as e:
@@ -86,7 +85,7 @@ def process_video_stream(stream_url, known_face_encodings, known_face_names, max
 
         face_names = []
         for face_encoding in face_encodings:
-            matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=0.6)
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
             name = "Unknown"
             if True in matches:
                 first_match_index = matches.index(True)
@@ -95,7 +94,7 @@ def process_video_stream(stream_url, known_face_encodings, known_face_names, max
 
         annotate_frame(frame, face_locations, face_names, known_face_names)
         stream_to_ffmpeg(frame, ffmpeg_process)
-
+        
     video_capture.release()
     ffmpeg_process.stdin.close()
     ffmpeg_process.wait()
