@@ -3,7 +3,7 @@ import numpy as np
 import os
 import json
 
-def encode_known_faces(faces_dir='data/faces', encodings_file='data/faces/known_face_encodings.json'):
+def encode_known_faces(faces_dir='data/faces', encodings_file='data/encoding/known_face_encodings.json'):
     known_face_encodings = []
     known_face_names = []
 
