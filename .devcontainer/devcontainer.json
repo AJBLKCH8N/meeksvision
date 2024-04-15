@@ -1,17 +1,24 @@
 {
-    "name": "Meeks Vision Dev Container",
-    "dockerComposeFile": "docker-compose.yml",
-    "service": "video-stream-processor",
-    "workspaceFolder": "/workspace",
-    "forwardPorts": [8080, 1935, 80],
-    "extensions": [
-      "ms-python.python",
-      "dbaeumer.vscode-eslint"
-    ],
-    "settings": {
+  "name": "Meeks Vision",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "ui-service",
+  "workspaceFolder": "/workspace",
+
+  "settings": {
       "terminal.integrated.shell.linux": "/bin/bash"
-    },
-    "postCreateCommand": "pip install -r requirements.txt",
-    "shutdownAction": "stopCompose"
-  }
-  
+  },
+
+  "extensions": [
+      "ms-python.python",
+      "ms-vscode.cpptools",
+      "streetsidesoftware.code-spell-checker"
+  ],
+
+  "forwardPorts": [
+      8000
+  ],
+
+  "postCreateCommand": "echo 'Container started'",
+
+  "remoteUser": "root"
+}

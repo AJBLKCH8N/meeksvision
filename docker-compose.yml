@@ -1,37 +1,45 @@
 version: '3.8'
 
 services:
-  video-stream-processor:
+  rtsp-stream-receiver:
     build:
-      context: ./services/video-stream-processor
-    environment:
-      - CAMERA_URLS=${CAMERA_URLS}
-      - KNOWN_FACES_DIR=${KNOWN_FACES_DIR}
-      - ENCODINGS_FILE=${ENCODINGS_FILE}
-      - STREAM_OUTPUT_URL=${STREAM_OUTPUT_URL}
+      context: ./services/rtsp-stream-receiver
+      dockerfile: Dockerfile
     volumes:
-      - ./data/faces:/app/faces
-    depends_on:
-      - streaming-service
+      - ./data/config:/app/config  # Mount the configuration directory
+    networks:
+      - app-network
 
-  streaming-service:
+  frame-processor:
     build:
-      context: ./services/streaming-service
-    ports:
-      - "1935:1935" # RTMP
-      - "8080:8080" # HTTP for HLS
+      context: ./services/frame-processor
+      dockerfile: Dockerfile
     volumes:
-      - ./data/hls:/mnt/hls
-      - ./data/config:/mnt/config
-      - ./data/faces:/mnt/faces
-
-  ui:
-    build:
-      context: ./services/ui
-    ports:
-      - "80:80"
+      - ./data/encoding:/app/encoding  # Mount the encoding directory
+    networks:
+      - app-network
     depends_on:
-      - streaming-service
+      - rtsp-stream-receiver
 
-volumes:
-  hls: # This volume stores HLS video fragments
+  video-streaming:
+    build:
+      context: ./services/video-streaming
+      dockerfile: Dockerfile
+    networks:
+      - app-network
+    depends_on:
+      - frame-processor
+
+  ui-service:
+    build:
+      context: ./services/ui-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"  # Map port for accessing the UI from a browser
+    networks:
+      - app-network
+    depends_on:
+      - video-streaming
+
+networks:
+  app-network:
