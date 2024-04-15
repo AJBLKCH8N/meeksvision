@@ -3,3 +3,4 @@ data/faces/*
 data/config/*
 data/encoding/*
 data/hls/*
+localtest/output.avi
