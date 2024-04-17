@@ -2,11 +2,11 @@ import cv2
 import zmq
 import numpy as np
 import logging
-from retry import retry
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 logging.basicConfig(level=logging.INFO)
 
-@retry(tries=5, delay=2)
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(2))
 def connect_to_stream(url):
     context = zmq.Context()
     socket = context.socket(zmq.PUB)

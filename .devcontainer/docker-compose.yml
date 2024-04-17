@@ -3,9 +3,9 @@ version: '3.8'
 services:
   rtsp-stream-receiver:
     build:
-      context: ./services/rtsp-stream-receiver
+      context: ../services/rtsp-stream-receiver
     volumes:
-      - ./data/config:/app/config  # Mount the configuration directory
+      - ../data/config:/app/config  # Mount the configuration directory
     networks:
       - app-network
     ports:
@@ -13,9 +13,9 @@ services:
 
   frame-processor:
     build:
-      context: ./services/frame-processor
+      context: ../services/frame-processor
     volumes:
-      - ./data/encoding:/app/encoding  # Mount the encoding directory
+      - ../data/encoding:/app/encoding  # Mount the encoding directory
     networks:
       - app-network
     ports:
@@ -25,7 +25,7 @@ services:
 
   video-streaming:
     build:
-      context: ./services/video-streaming
+      context: ../services/video-streaming
     networks:
       - app-network
     ports:
@@ -35,7 +35,7 @@ services:
 
   ui-service:
     build:
-      context: ./services/ui-service
+      context: ../services/ui-service
     ports:
       - "8000:8000"  # Map port for accessing the UI from a browser
     networks:

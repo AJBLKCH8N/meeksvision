@@ -8,10 +8,10 @@ ENV PYTHONUNBUFFERED 1
 # Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies
-# This includes libraries needed by dlib, OpenCV, and face_recognition
+# Install system dependencies first to leverage Docker cache efficiently
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+       build-essential \
        libopencv-dev \
        cmake \
        g++ \
@@ -22,11 +22,10 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# It's important to make sure that dlib is properly installed,
-# you might need to build dlib from source if not using pip.
-# Install Python dependencies
+# Now copy the requirements.txt and install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
+
 
 # Copy the application files into the container
 COPY app/ .

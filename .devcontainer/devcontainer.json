@@ -1,24 +1,25 @@
 {
-  "name": "Meeks Vision",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "ui-service",
-  "workspaceFolder": "/workspace",
-
-  "settings": {
-      "terminal.integrated.shell.linux": "/bin/bash"
-  },
-
-  "extensions": [
-      "ms-python.python",
-      "ms-vscode.cpptools",
-      "streetsidesoftware.code-spell-checker"
-  ],
-
-  "forwardPorts": [
-      8000
-  ],
-
-  "postCreateCommand": "echo 'Container started'",
-
-  "remoteUser": "root"
-}
+    "name": "Meeks Vision",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "ui-service",
+    "workspaceFolder": "/workspace",
+    "customizations": {
+      "vscode": {
+        "settings": {
+            "terminal.integrated.shell.linux": "/bin/bash"
+          },
+        "extensions": [
+          "ms-python.python",
+          "ms-vscode.cpptools",
+          "streetsidesoftware.code-spell-checker"
+        ]
+      }
+    },
+    "forwardPorts": [
+      8000,
+      5000
+    ],
+    "postCreateCommand": "echo 'Container started'",
+    "remoteUser": "root"
+  }
+  

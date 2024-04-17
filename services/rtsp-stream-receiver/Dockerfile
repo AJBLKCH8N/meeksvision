@@ -14,6 +14,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        libopencv-dev \
        build-essential \
+       retry \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
