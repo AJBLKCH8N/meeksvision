@@ -10,18 +10,22 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 def load_known_encodings(path):
     try:
         with open(path, 'r') as file:
-            known_encodings = json.load(file)
-        logging.debug(f"Raw encodings loaded: {known_encodings}")  # Detailed debug log
-        known_encodings = {name: [np.array(encoding) for encoding in encodings] for name, encodings in known_encodings.items()}
-        logging.info("Known encodings processed and loaded successfully from {}".format(path))
+            data = json.load(file)
+        known_encodings = {name: [np.array(enc, dtype='float64') for enc in encodings] for name, encodings in data.items()}
+        if not known_encodings:
+            logging.error("Encodings are empty after loading.")
+        else:
+            logging.info(f"Loaded encodings for {len(known_encodings)} people.")
         return known_encodings
     except FileNotFoundError:
-        logging.error("The file {} was not found.".format(path))
+        logging.error(f"The file {path} was not found.")
         return {}
     except json.JSONDecodeError:
-        logging.error("Error decoding JSON from the file {}.".format(path))
+        logging.error(f"Error decoding JSON from the file {path}.")
         return {}
-
+    except Exception as e:
+        logging.error(f"An unexpected error occurred: {str(e)}")
+        return {}
 
 known_encodings = load_known_encodings('/app/encoding/known_face_encodings.json')
 
@@ -37,21 +41,33 @@ def detect_faces(frame):
 
 def recognize_faces(frame, face_locations):
     try:
-        logging.debug(f"Starting face recognition on frame with shape={frame.shape} and locations={face_locations}")
         current_encodings = face_recognition.face_encodings(frame, face_locations)
         face_names = []
         for current_encoding in current_encodings:
-            matches = {name: face_recognition.compare_faces(encodings, current_encoding, tolerance=0.6) for name, encodings in known_encodings.items()}
-            face_distances = {name: face_recognition.face_distance(encodings, current_encoding) for name, encodings in known_encodings.items()}
-            best_match = min(face_distances, key=face_distances.get, default="Unknown")
-            name = best_match if face_distances[best_match] < 0.6 else "Unknown"
-            face_names.append(name)
+            if known_encodings:
+                distances = {name: np.linalg.norm(encodings - current_encoding, axis=1) for name, encodings in known_encodings.items() if encodings}
+                if not distances:  # Check if distances dictionary is empty
+                    logging.error("Distances computation returned empty. No known encodings to compare.")
+                    face_names.append('Unknown')
+                    logging.info("Recognized face: Unknown")
+                    continue
+                min_distance = {name: min(dist) if dist else float('inf') for name, dist in distances.items()}
+                best_match = min(min_distance, key=min_distance.get)
+                if min_distance[best_match] < 0.6:
+                    face_names.append(best_match)
+                    logging.info(f"Recognized face: {best_match}")
+                else:
+                    face_names.append('Unknown')
+                    logging.info("Recognized face: Unknown")
+            else:
+                logging.error("No known encodings loaded.")
+                face_names.append('Unknown')
+                logging.info("Recognized face: Unknown")
         
-        logging.info("Faces recognized: {}".format(", ".join(face_names) if face_names else "No faces recognized"))
         return face_locations, face_names
     except Exception as e:
         logging.error(f"Failed to recognize faces: {e}, frame shape: {frame.shape}")
-        return face_locations, []
+        return face_locations, ['Unknown'] * len(face_locations)
 
 
 def annotate_frame(frame, face_locations, face_names):
@@ -67,4 +83,3 @@ def annotate_frame(frame, face_locations, face_names):
     except Exception as e:
         logging.error(f"Failed to annotate frame: {e}, face details: {zip(face_locations, face_names)}")
         return frame
-

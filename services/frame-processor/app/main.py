@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 import logging
-from face_recognition import detect_faces, recognize_faces, annotate_frame
+from recognition import detect_faces, recognize_faces, annotate_frame
 from utils import initialize_context
 
 # Configure logging
