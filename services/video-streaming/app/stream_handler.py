@@ -25,7 +25,7 @@ def frame_receiver():
                 frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
                 if frame is not None:
                     frame_queue.put(frame)
-                    logging.debug("Frame received and added to the queue.")
+                    logging.debug(f"Frame received and added to the queue. Queue size: {frame_queue.qsize()}")
                 else:
                     logging.warning("Received an empty frame.")
             except zmq.ZMQError as e:

@@ -1,5 +1,6 @@
 from flask import Flask, Response
 from stream_handler import frame_queue
+from flask_cors import CORS
 import cv2
 import logging
 
