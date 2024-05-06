@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  rtsp-stream-receiver:
+    build:
+      context: ./services/rtsp-stream-receiver
+      dockerfile: Dockerfile
+    volumes:
+      - ./data/config:/app/config  # Mount the configuration directory
+    networks:
+      - app-network
+
+  frame-processor:
+    build:
+      context: ./services/frame-processor
+      dockerfile: Dockerfile
+    volumes:
+      - ./data/encoding:/app/encoding  # Mount the encoding directory
+    networks:
+      - app-network
+    depends_on:
+      - rtsp-stream-receiver
+
+  video-streaming:
+    build:
+      context: ./services/video-streaming
+      dockerfile: Dockerfile
+    networks:
+      - app-network
+    depends_on:
+      - frame-processor
+
+  ui-service:
+    build:
+      context: ./services/ui-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"  # Map port for accessing the UI from a browser
+    networks:
+      - app-network
+    depends_on:
+      - video-streaming
+
+networks:
+  app-network:

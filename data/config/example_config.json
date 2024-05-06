@@ -1,0 +1,8 @@
+{
+  "known_faces_dir": "../data/encoding/",
+  "encodings_file": "../data/encoding/known_face_encodings.json",
+  "rtsp_urls": [
+    "rtsp://<CamName>:<Password>@<ip addr:554>/stream1"
+  ],
+  "streaming_service_url": "rtmp://streaming-service/live/stream"
+}

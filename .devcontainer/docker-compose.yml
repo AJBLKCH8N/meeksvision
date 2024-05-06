@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  rtsp-stream-receiver:
+    build:
+      context: ../services/rtsp-stream-receiver
+    volumes:
+      - ../data/config:/app/config  # Mount the configuration directory
+    networks:
+      - app-network
+    ports:
+      - "5555:5555"  # Expose the port used by ZeroMQ PUB socket
+
+  frame-processor:
+    build:
+      context: ../services/frame-processor
+    volumes:
+      - ../data/encoding:/app/encoding  # Mount the encoding directory
+    networks:
+      - app-network
+    ports:
+      - "5560:5560"  # Expose the port used by ZeroMQ PUB socket to send frames to the video-streaming service
+    depends_on:
+      - rtsp-stream-receiver
+
+  video-streaming:
+    build:
+      context: ../services/video-streaming
+    networks:
+      - app-network
+    ports:
+      - "5000:5000"  # Expose the Flask app port
+    depends_on:
+      - frame-processor
+
+  ui-service:
+    build:
+      context: ../services/ui-service
+    ports:
+      - "8000:8000"  # Map port for accessing the UI from a browser
+    networks:
+      - app-network
+    depends_on:
+      - video-streaming
+
+networks:
+  app-network:

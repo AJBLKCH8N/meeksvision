@@ -1,0 +1,6 @@
+streams.json
+data/faces/*
+data/config/config.json
+data/encoding/*
+data/hls/*
+localtest/output.avi
